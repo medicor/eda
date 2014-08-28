@@ -1,4 +1,4 @@
 EDA
 ===
 
-Explorative data analysis - a Stratum widget
+a Stratum widget for simple explorative data analysis
