@@ -227,6 +227,7 @@ Ext.define('EDA.view.MainView', {
 				header: false,
 				html:
 					'<ol>' +
+					'<li>Fixa DD för variabellistan.</li>' +
 					'<li>Lägg till etikett som visar prefixText + suffixText för vald variabel.</li>' +
 					'</ol>'
 			}, {
