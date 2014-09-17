@@ -60,11 +60,17 @@ Ext.define('EDA.store.QuestionStore', {
 	fields: [
 		{ name: 'QuestionID',	type: 'int' },
 		{ name: 'ColumnName',	type: 'string' },
-		{ name: 'PrefixText',	type: 'string'  },
-		{ name: 'SuffixText',	type: 'string'  },
+		{ name: 'PrefixText',	type: 'string' },
+		{ name: 'SuffixText',	type: 'string' },
 		{ name: 'Level',		type: 'int' },
 		{ name: 'Form',			type: 'auto' },
-		{ name: 'Domain',		type: 'auto' }
+		{ name: 'Domain',		type: 'auto' },
+		{ name: 'Generation',	type: 'int' }
+	],
+	filters: [
+		function(anItem) {
+			return anItem.get('Domain').DomainName !== 'Section';
+		}
 	]
 });
 
@@ -159,7 +165,7 @@ Ext.define('EDA.view.MainView', {
 							dataIndex: 'ColumnName',
 							flex: 1,
 							renderer: function (aValue, aMeta) {
-								var si, pf;
+								var si, gn, vs;
 								switch (aMeta.record.get('Level')) {
 								case 1:
 									si = 'IconLevelNominal.png';
@@ -171,8 +177,14 @@ Ext.define('EDA.view.MainView', {
 									si = 'IconLevelScale.png';
 									break;
 								}
-								pf = aMeta.record.get('Form');
-								return '<img class="iconLevel" src="images/' + si + '">' + aValue;
+								vs = '';
+								gn = aMeta.record.get('Generation');
+								while (gn) { // Add one icon for each generation.
+									vs = vs + '<img class="iconLevel" src="images/IconLevelParent.png">';
+									gn = gn-1;
+								}
+								vs = vs + '<img class="iconLevel" src="images/' + si + '">' + aValue;
+								return vs;
 							}
 						}],
 						viewConfig: {
@@ -215,10 +227,7 @@ Ext.define('EDA.view.MainView', {
 				header: false,
 				html:
 					'<ol>' +
-					'<li>Lägg till referens till alla Form(s) för alla Questions i QuestionStore.</li>' +
-					'<li>Lägg till ikoner för arv i listan med variabler innan ikon för nivå.</li>' +
 					'<li>Lägg till etikett som visar prefixText + suffixText för vald variabel.</li>' +
-					'<li>Filtrera bort sektioner från Questions.</li>' +
 					'</ol>'
 			}, {
 				xtype: 'panel',
@@ -267,8 +276,7 @@ Ext.define('EDA.view.MainView', {
 	onSelectForm: function (aComponent, aFormID) {
 		'use strict';
 		var qc = this.down('#questionList'),
-			qs = qc.getStore(),
-			cf;
+			qs = qc.getStore();
 		
 		if (!aFormID) {
 			qs.removeAll();
@@ -282,15 +290,21 @@ Ext.define('EDA.view.MainView', {
 					qc.setLoading(false);
 				},
 				success: function (aResponse) {
-					var ro = Ext.decode(aResponse.responseText).data;
-					qc.setLoading(false);
+					var ro = Ext.decode(aResponse.responseText).data,
+						cf = ro,
+						gn = 0, // Number of "ancestry generations" to current.
+						fq = function(aQuestion) {
+							aQuestion.Form = cf;
+							aQuestion.Generation = gn;
+						};
 					qs.removeAll();
-					qs.loadData(ro.Questions);
-					cf = ro.Parent;
 					while (cf) {
+						Ext.Array.forEach(cf.Questions, fq); // Add Form reference to all questions.
 						qs.loadData(cf.Questions, true);
 						cf = cf.Parent;
+						gn = gn + 1;
 					}
+					qc.setLoading(false);
 				}
 			});
 		}
