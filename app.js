@@ -13,7 +13,7 @@ Ext.define('EDA.store.RegisterStore', {
 	autoDestroy: true,
 	proxy: {
 		type: 'ajax',
-		url: EDA.config.apihost + 'metadata/registers?apikey',
+		url: EDA.config.apihost + 'metadata/registers',
 		reader: {
 			type: 'json',
 			rootProperty: 'data'
@@ -74,16 +74,25 @@ Ext.define('EDA.view.MainView', {
 	layout: {
 		type: 'center',
 	},
-//	style: 'margin: 100px auto; width: 720px',
 	initComponent: function () {
-        'use strict';
+//		'use strict';
 		this.items = [{
 			xtype: 'panel',
 			itemId: 'filterPanel',
-            width: '75%',
-            height: '90%',
+			plugins: ['responsive'],
+			responsiveConfig: {
+				'width <= 800': {
+					width: '90%'
+				},
+				'width > 800 && width < 1000': {
+					width: 720
+				},
+				'width >= 1000': {
+					width: 960
+				}
+			},
 			bodyPadding: 10,
-            border: false,
+			border: false,
 			defaults: {
 				padding: '0 0 10 10'
 			},
@@ -97,7 +106,7 @@ Ext.define('EDA.view.MainView', {
 				layout: 'column',
 				items: [{
 					xtype: 'combobox',
-					columnWidth: 1,
+					columnWidth: 0.4,
 					emptyText: 'Välj register',
 					itemId: 'registerList',
 					fieldLabel: 'Register',
@@ -112,7 +121,7 @@ Ext.define('EDA.view.MainView', {
 					}
 				}, {
 					xtype: 'combobox',
-					columnWidth: 1,
+					columnWidth: 0.6,
 					itemId: 'formList',
 					fieldLabel: 'Formulär',
 					queryMode: 'local',
@@ -289,7 +298,7 @@ Ext.define('EDA.view.MainView', {
 	
 });
 
-// Only when used as am application and not a widget ...
+// Only when used as application and not a widget ...
 Ext.application({
 	name: 'EDA',
 	launch: function () {
