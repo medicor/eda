@@ -242,19 +242,19 @@ Ext.define('EDA.view.MainView', {
 		this.superclass.initComponent.call(this);
 	},
 	
-	onSourceBoxReady: function (aSourceCOmponent) {
+	onSourceBoxReady: function (aSourceComponent) {
 		'use strict';
-		this.dropTarget = new Ext.dd.DropTarget(aSourceCOmponent.el, {
+		this.dropTarget = new Ext.dd.DropTarget(aSourceComponent.el, {
 			ddGroup: 'variable-selection',
 			notifyEnter: function () {
-				aSourceCOmponent.inputEl.addCls('dropTargetEntered');
+				aSourceComponent.inputEl.addCls('dropTargetEntered');
 			},
 			notifyOut: function () {
-				aSourceCOmponent.inputEl.removeCls('dropTargetEntered');
+				aSourceComponent.inputEl.removeCls('dropTargetEntered');
 			},
 			notifyDrop: function (aDragSource) {
-				aSourceCOmponent.inputEl.removeCls('dropTargetEntered');
-				aSourceCOmponent.setValue(aDragSource.dragData.records[0].get('RegisterName'));
+				aSourceComponent.inputEl.removeCls('dropTargetEntered');
+				aSourceComponent.setValue(aDragSource.dragData.records[0].get('RegisterName'));
 				return true;
 			}
 		});
