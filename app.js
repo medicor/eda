@@ -178,7 +178,7 @@ Ext.define('EDA.view.MainView', {
 									break;
 								}
 								vs = '';
-								gn = aMeta.record.get('Generation');
+								gn = aMeta.record.get('Generation' );
 								while (gn) { // Add one icon for each generation.
 									vs = vs + '<img class="iconLevel" src="images/IconLevelParent.png">';
 									gn = gn-1;
