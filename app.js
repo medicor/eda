@@ -74,6 +74,155 @@ Ext.define('EDA.store.QuestionStore', {
 	]
 });
 
+// Custom widgets.
+
+Ext.define ('EDA.widget.RegisterSelector', {
+	extend: 'Ext.form.field.ComboBox',
+	xtype: 'registerselector',
+	
+	initComponent: function() {
+		Ext.apply (this, {
+			store: Ext.create('EDA.store.RegisterStore'),
+			editable: false,
+			queryMode: 'local',
+			emptyText: 'Välj register',
+			fieldLabel: 'Register',
+			displayField: 'RegisterName',
+			valueField: 'RegisterID',
+			listeners: {
+				change: function (aComponent, aRegisterID) {
+					var fc = this.that.down('#formSelector'),
+						fs = fc.getStore();
+					
+					fs.load({
+						url: fs.getProxy().url + '/' + aRegisterID,
+						callback: function () {
+							fc.emptyText = 'Välj formulär';
+							fc.select();
+						}
+					});
+				}
+			}
+		});
+		this.superclass.initComponent.call(this);
+	}
+});
+
+Ext.define ('EDA.widget.FormSelector', {
+	extend: 'Ext.form.field.ComboBox',
+	xtype: 'formselector',
+	
+	initComponent: function() {
+		Ext.apply (this, {
+			store: Ext.create('EDA.store.FormStore'),
+			fieldLabel: 'Formulär',
+			queryMode: 'local',
+			editable: false,
+			displayField: 'FormTitle',
+			valueField: 'FormID',
+			listeners: {
+				change: function (aComponent, aFormID) {
+					//TODO: this handling should be variableSelector:s responsibility. Move it there.
+					var qc = this.that.down('#variableSelector'),
+						qs = qc.getStore();
+					
+					if (!aFormID) {
+						qs.removeAll();
+					} else {
+						// Load form in detail since it contains all questions and parent's questions.
+						qc.setLoading(true);
+						Ext.Ajax.request({
+							url: EDA.config.apihost + 'metadata/forms/' + aFormID,
+							method: 'GET',
+							failure: function (aResponse) {
+								qc.setLoading(false);
+							},
+							success: function (aResponse) {
+								var ro = Ext.decode(aResponse.responseText).data,
+									cf = ro,
+									gn = 0, // Number of "ancestry generations" to current.
+									fq = function(aQuestion) {
+										aQuestion.Form = cf;
+										aQuestion.Generation = gn;
+									};
+								qs.removeAll();
+								while (cf) {
+									Ext.Array.forEach(cf.Questions, fq); // Add Form reference to all questions.
+									qs.loadData(cf.Questions, true);
+									cf = cf.Parent;
+									gn = gn + 1;
+								}
+								qc.setLoading(false);
+							}
+						});
+					}
+				}
+			}
+		});
+		this.superclass.initComponent.call(this);
+	}
+});
+
+Ext.define ('EDA.widget.VariableSelector', {
+	extend: 'Ext.grid.Panel',
+	xtype: 'variableselector',
+	
+	initComponent: function() {
+		Ext.apply (this, {
+			frameHeader: false,
+			syncRowHeight: false,
+			enableColumnHide: false,
+			enableColumnMove: false,
+			enableColumnResize: false,
+			hideHeaders: true,
+			rowLines: false,
+			scroll: 'vertical',
+			sortableColumns: false,
+			store: Ext.create('EDA.store.QuestionStore'),
+			columns: [{
+				xtype: 'gridcolumn',
+				dataIndex: 'ColumnName',
+				flex: 1,
+				renderer: function (aValue, aMeta) {
+					var si, gn, vs;
+					switch (aMeta.record.get('Level')) {
+					case 1:
+						si = 'IconLevelNominal.png';
+						break;
+					case 2:
+						si = 'IconLevelOrdinal.png';
+						break;
+					case 3:
+						si = 'IconLevelScale.png';
+						break;
+					}
+					vs = '';
+					gn = aMeta.record.get('Generation' );
+					while (gn) { // Add one icon for each generation.
+						vs = vs + '<img class="iconLevel" src="images/IconLevelParent.png">';
+						gn = gn-1;
+					}
+					vs = vs + '<img class="iconLevel" src="images/' + si + '">' + aValue;
+					return vs;
+				}
+			}],
+			viewConfig: {
+				frame: true,
+				height: 210,
+				autoScroll: false,
+				loadingText: 'Laddar ...',
+				plugins: [
+					Ext.create('Ext.grid.plugin.DragDrop', {
+						ddGroup: 'variable-selection',
+						enableDrop: false
+					})
+				]
+			}
+		});
+		this.superclass.initComponent.call(this);
+	}
+});
+
 Ext.define('EDA.view.MainView', {
 	extend: 'Ext.container.Viewport',
 	itemId: 'mainView',
@@ -81,7 +230,6 @@ Ext.define('EDA.view.MainView', {
 		type: 'center',
 	},
 	initComponent: function () {
-//		'use strict';
 		this.items = [{
 			xtype: 'panel',
 			itemId: 'filterPanel',
@@ -105,102 +253,35 @@ Ext.define('EDA.view.MainView', {
 			items: [{
 				xtype: 'form',
 				border: false,
+				layout: 'column',
 				defaults: {
 					padding: '0 10 10 0',
 					labelAlign: 'top'
 				},
-				layout: 'column',
 				items: [{
-					xtype: 'combobox',
-					columnWidth: 0.4,
-					emptyText: 'Välj register',
-					itemId: 'registerList',
-					fieldLabel: 'Register',
-					queryMode: 'local',
-					editable: false,
-					displayField: 'RegisterName',
-					valueField: 'RegisterID',
-					store: Ext.create('EDA.store.RegisterStore'),
-					listeners: {
-						scope: this,
-						change: this.onSelectRegister
-					}
-				}, {
-					xtype: 'combobox',
-					columnWidth: 0.6,
-					itemId: 'formList',
-					fieldLabel: 'Formulär',
-					queryMode: 'local',
-					editable: false,
-					displayField: 'FormTitle',
-					valueField: 'FormID',
-					store: Ext.create('EDA.store.FormStore'),
-					listeners: {
-						scope: this,
-						change: this.onSelectForm
-					}
-				}, {
+					that: this,
+					xtype: 'registerselector',
+					itemId: 'registerSelector',
+					columnWidth: 0.4
+				},{
+					that: this,
+					xtype: 'formselector',
+					itemId: 'formSelector',
+					columnWidth: 0.6
+				},{
 					xtype: 'container',
 					columnWidth: 0.4,
 					items: [{
 						xtype: 'label',
 						text: 'Variabler:',
 						columnWidth: 0.4
-					}, {
-						xtype: 'gridpanel',
-						columnWidth: 0.4,
-						itemId: 'questionList',
-						frameHeader: false,
-						syncRowHeight: false,
-						enableColumnHide: false,
-						enableColumnMove: false,
-						enableColumnResize: false,
-						hideHeaders: true,
-						rowLines: false,
-						scroll: 'vertical',
-						sortableColumns: false,
-						store: Ext.create('EDA.store.QuestionStore'),
-						columns: [{
-							xtype: 'gridcolumn',
-							dataIndex: 'ColumnName',
-							flex: 1,
-							renderer: function (aValue, aMeta) {
-								var si, gn, vs;
-								switch (aMeta.record.get('Level')) {
-								case 1:
-									si = 'IconLevelNominal.png';
-									break;
-								case 2:
-									si = 'IconLevelOrdinal.png';
-									break;
-								case 3:
-									si = 'IconLevelScale.png';
-									break;
-								}
-								vs = '';
-								gn = aMeta.record.get('Generation' );
-								while (gn) { // Add one icon for each generation.
-									vs = vs + '<img class="iconLevel" src="images/IconLevelParent.png">';
-									gn = gn-1;
-								}
-								vs = vs + '<img class="iconLevel" src="images/' + si + '">' + aValue;
-								return vs;
-							}
-						}],
-						viewConfig: {
-							frame: true,
-							height: 210,
-							autoScroll: false,
-							loadingText: 'Laddar ...',
-							plugins: [
-								Ext.create('Ext.grid.plugin.DragDrop', {
-									ddGroup: 'variable-selection',
-									enableDrop: false
-								})
-							]
-						}
+					},{
+						that: this,
+						xtype: 'variableselector',
+						itemId: 'variableSelector',
+						columnWidth: 0.4
 					}]
-				}, {
+				},{
 					xtype: 'textfield',
 					columnWidth: 0.3,
 					fieldLabel: 'X-axel',
@@ -227,6 +308,10 @@ Ext.define('EDA.view.MainView', {
 				header: false,
 				html:
 					'<ol>' +
+					'<li>Utnyttja references till att koppla ihop widgets, inte <code>that.up(...)</code> </li>' +
+					'<li>Ikon saknas i variabellista för domän kommentar/text.</li>' +
+					'<li>Lägg till rad för URL till aktuellt resultat.</li>' +
+					'<li>Lägg till rad för URL till aktuellt api-anrop.</li>' +
 					'<li>Fixa DD för variabellistan.</li>' +
 					'<li>Lägg till etikett som visar prefixText + suffixText för vald variabel.</li>' +
 					'</ol>'
@@ -238,7 +323,6 @@ Ext.define('EDA.view.MainView', {
 				header: false
 			}]
 		}];
-//		this.callParent();
 		this.superclass.initComponent.call(this);
 	},
 	
@@ -259,57 +343,6 @@ Ext.define('EDA.view.MainView', {
 			}
 		});
 	},
-	
-	onSelectRegister: function (aComponent, aRegisterID) {
-		'use strict';
-		var fc = this.down('#formList'),
-			fs = fc.getStore();
-		
-		fs.load({
-			url: fs.getProxy().url + '/' + aRegisterID,
-			callback: function () {
-				fc.emptyText = 'Välj formulär';
-				fc.select();
-			}
-		});
-	},
-	
-	onSelectForm: function (aComponent, aFormID) {
-		'use strict';
-		var qc = this.down('#questionList'),
-			qs = qc.getStore();
-		
-		if (!aFormID) {
-			qs.removeAll();
-		} else {
-			// Load form in detail since it contains all questions and parent's questions.
-			qc.setLoading(true);
-			Ext.Ajax.request({
-				url: EDA.config.apihost + 'metadata/forms/' + aFormID,
-				method: 'GET',
-				failure: function (aResponse) {
-					qc.setLoading(false);
-				},
-				success: function (aResponse) {
-					var ro = Ext.decode(aResponse.responseText).data,
-						cf = ro,
-						gn = 0, // Number of "ancestry generations" to current.
-						fq = function(aQuestion) {
-							aQuestion.Form = cf;
-							aQuestion.Generation = gn;
-						};
-					qs.removeAll();
-					while (cf) {
-						Ext.Array.forEach(cf.Questions, fq); // Add Form reference to all questions.
-						qs.loadData(cf.Questions, true);
-						cf = cf.Parent;
-						gn = gn + 1;
-					}
-					qc.setLoading(false);
-				}
-			});
-		}
-	}
 	
 });
 
