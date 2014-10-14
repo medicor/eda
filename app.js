@@ -90,22 +90,25 @@ Ext.define ('EDA.widget.RegisterSelector', {
 			displayField: 'RegisterName',
 			valueField: 'RegisterID',
 			listeners: {
-				change: function (aComponent, aRegisterID) {
-					var fc = this.that.down('#formSelector'),
-						fs = fc.getStore();
-					
-					fs.load({
-						url: fs.getProxy().url + '/' + aRegisterID,
-						callback: function () {
-							fc.emptyText = 'Välj formulär';
-							fc.select();
-						}
-					});
-				}
+				change: this.onSelectionChange
 			}
 		});
 		this.superclass.initComponent.call(this);
+	},
+	
+	onSelectionChange: function (aComponent, aRegisterID) {
+		var fc = this.that.lookupReference('formSelector'),
+			fs = fc.getStore();
+		
+		fs.load({
+			url: fs.getProxy().url + '/' + aRegisterID,
+			callback: function () {
+				fc.emptyText = 'Välj formulär';
+				fc.select();
+			}
+		});
 	}
+	
 });
 
 Ext.define ('EDA.widget.FormSelector', {
@@ -123,7 +126,7 @@ Ext.define ('EDA.widget.FormSelector', {
 			listeners: {
 				change: function (aComponent, aFormID) {
 					//TODO: this handling should be variableSelector:s responsibility. Move it there.
-					var qc = this.that.down('#variableSelector'),
+					var qc = this.that.lookupReference('questionSelector'),
 						qs = qc.getStore();
 					
 					if (!aFormID) {
@@ -163,9 +166,9 @@ Ext.define ('EDA.widget.FormSelector', {
 	}
 });
 
-Ext.define ('EDA.widget.VariableSelector', {
+Ext.define ('EDA.widget.QuestionSelector', {
 	extend: 'Ext.grid.Panel',
-	xtype: 'variableselector',
+	xtype: 'questionselector',
 	
 	initComponent: function() {
 		Ext.apply (this, {
@@ -212,10 +215,13 @@ Ext.define ('EDA.widget.VariableSelector', {
 				autoScroll: false,
 				loadingText: 'Laddar ...',
 				plugins: [
+					'gridviewdragdrop'
+					/*
 					Ext.create('Ext.grid.plugin.DragDrop', {
 						ddGroup: 'variable-selection',
 						enableDrop: false
 					})
+					*/
 				]
 			}
 		});
@@ -226,6 +232,7 @@ Ext.define ('EDA.widget.VariableSelector', {
 Ext.define('EDA.view.MainView', {
 	extend: 'Ext.container.Viewport',
 	itemId: 'mainView',
+	referenceHolder: true,
 	layout: {
 		type: 'center',
 	},
@@ -233,7 +240,14 @@ Ext.define('EDA.view.MainView', {
 		this.items = [{
 			xtype: 'panel',
 			itemId: 'filterPanel',
-			plugins: ['responsive'],
+			bodyPadding: 10,
+			border: false,
+			defaults: {
+				padding: '0 0 10 10'
+			},
+			plugins: [
+				'responsive'
+			],
 			responsiveConfig: {
 				'width <= 800': {
 					width: '90%'
@@ -244,11 +258,6 @@ Ext.define('EDA.view.MainView', {
 				'width >= 1000': {
 					width: 960
 				}
-			},
-			bodyPadding: 10,
-			border: false,
-			defaults: {
-				padding: '0 0 10 10'
 			},
 			items: [{
 				xtype: 'form',
@@ -261,12 +270,12 @@ Ext.define('EDA.view.MainView', {
 				items: [{
 					that: this,
 					xtype: 'registerselector',
-					itemId: 'registerSelector',
+					reference: 'registerSelector',
 					columnWidth: 0.4
 				},{
 					that: this,
 					xtype: 'formselector',
-					itemId: 'formSelector',
+					reference: 'formSelector',
 					columnWidth: 0.6
 				},{
 					xtype: 'container',
@@ -277,8 +286,8 @@ Ext.define('EDA.view.MainView', {
 						columnWidth: 0.4
 					},{
 						that: this,
-						xtype: 'variableselector',
-						itemId: 'variableSelector',
+						xtype: 'questionselector',
+						reference: 'questionSelector',
 						columnWidth: 0.4
 					}]
 				},{
@@ -308,7 +317,7 @@ Ext.define('EDA.view.MainView', {
 				header: false,
 				html:
 					'<ol>' +
-					'<li>Utnyttja references till att koppla ihop widgets, inte <code>that.up(...)</code> </li>' +
+					'<li>Använda <code>ViewController</code> istället för references?</li>' +
 					'<li>Ikon saknas i variabellista för domän kommentar/text.</li>' +
 					'<li>Lägg till rad för URL till aktuellt resultat.</li>' +
 					'<li>Lägg till rad för URL till aktuellt api-anrop.</li>' +
