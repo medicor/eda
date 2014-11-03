@@ -317,6 +317,7 @@ Ext.define('EDA.view.MainView', {
 				header: false,
 				html:
 					'<ol>' +
+					'<li>Gör x,y och z som tre typeaheads med olika tab panels beroende på typ av variabel.</li>' +
 					'<li>Använda <code>ViewController</code> istället för references?</li>' +
 					'<li>Ikon saknas i variabellista för domän kommentar/text.</li>' +
 					'<li>Lägg till rad för URL till aktuellt resultat.</li>' +
