@@ -74,8 +74,6 @@ Ext.define('EDA.store.QuestionStore', {
 	]
 });
 
-// Custom widgets.
-
 Ext.define ('EDA.widget.RegisterSelector', {
 	extend: 'Ext.form.field.ComboBox',
 	xtype: 'registerselector',
@@ -165,7 +163,7 @@ Ext.define ('EDA.widget.FormSelector', {
 		this.superclass.initComponent.call(this);
 	}
 });
-
+/*
 Ext.define ('EDA.widget.QuestionSelector', {
 	extend: 'Ext.grid.Panel',
 	xtype: 'questionselector',
@@ -216,19 +214,13 @@ Ext.define ('EDA.widget.QuestionSelector', {
 				loadingText: 'Laddar ...',
 				plugins: [
 					'gridviewdragdrop'
-					/*
-					Ext.create('Ext.grid.plugin.DragDrop', {
-						ddGroup: 'variable-selection',
-						enableDrop: false
-					})
-					*/
 				]
 			}
 		});
 		this.superclass.initComponent.call(this);
 	}
 });
-
+*/
 Ext.define('EDA.view.MainView', {
 	extend: 'Ext.container.Viewport',
 	itemId: 'mainView',
@@ -271,13 +263,13 @@ Ext.define('EDA.view.MainView', {
 					that: this,
 					xtype: 'registerselector',
 					reference: 'registerSelector',
-					columnWidth: 0.4
+					columnWidth: 1.0
 				},{
 					that: this,
 					xtype: 'formselector',
 					reference: 'formSelector',
-					columnWidth: 0.6
-				},{
+					columnWidth: 1.0
+				}/*,{
 					xtype: 'container',
 					columnWidth: 0.4,
 					items: [{
@@ -290,26 +282,28 @@ Ext.define('EDA.view.MainView', {
 						reference: 'questionSelector',
 						columnWidth: 0.4
 					}]
-				},{
-					xtype: 'textfield',
-					columnWidth: 0.3,
+				}*/,{
+					xtype: 'combobox',
+					columnWidth: 0.333,
 					fieldLabel: 'X-axel',
-					readOnly: true,
-					listeners: {
-						scope: this,
-						boxready: this.onSourceBoxReady
+					store: questionStore,
+					listConfig: {
+						getInnerTpl: this.questionRenderer
 					}
-				}, {
-					xtype: 'textfield',
-					columnWidth: 0.3,
+				},{
+					xtype: 'combobox',
+					columnWidth: 0.333,
 					fieldLabel: 'Y-axel',
-					readOnly: true,
-					listeners: {
-						scope: this,
-						boxready: this.onSourceBoxReady
+					store: questionStore,
+					listConfig: {
+						getInnerTpl: this.questionRenderer
 					}
+				},{
+					xtype: 'combobox',
+					columnWidth: 0.333,
+					fieldLabel: 'Metod'
 				}]
-			}, {
+			},{
 				xtype: 'panel',
 				flex: 1,
 				itemId: 'todoPanel',
@@ -336,6 +330,10 @@ Ext.define('EDA.view.MainView', {
 		this.superclass.initComponent.call(this);
 	},
 	
+	questionRenderer: function(aBoundsList) {
+		return '{[values.name.replace(this.field.getRawValue(), "" + this.field.getRawValue() + "")]}';
+	}
+/*
 	onSourceBoxReady: function (aSourceComponent) {
 		'use strict';
 		this.dropTarget = new Ext.dd.DropTarget(aSourceComponent.el, {
@@ -352,9 +350,11 @@ Ext.define('EDA.view.MainView', {
 				return true;
 			}
 		});
-	},
-	
+	}
+*/
 });
+
+var questionStore = Ext.create('EDA.store.QuestionStore');
 
 // Only when used as application and not a widget ...
 Ext.application({
