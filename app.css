@@ -1,3 +1,4 @@
-h1,h2,h3,ul,li,textarea,label,input,p,span,a,div { font-family: 'Source Sans Pro', sans-serif !important; font-size: 17px !important; }
-.dropTargetEntered { outline: 1px solid #af9 }
-.iconLevel { vertical-align: middle; padding-right: 5px; }
+h1,h2,h3,ul,li,textarea,label,input,p,span,a,div, .x-form-text-default,.x-boundlist-item { font-family: 'Source Sans Pro', sans-serif !important; font-size: 17px; line-height: 25px; }
+.icon-level { vertical-align: middle; padding-right: 5px; }
+.variable-item-wrapper { border-bottom: 1px dotted #ccc; padding: 5px 5px;}
+.variable-item-note { font-size: 13px; font-style: italic; line-height: 15px; }
