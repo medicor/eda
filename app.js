@@ -281,7 +281,7 @@ Ext.define('EDA.view.MainView', {
 			border: false,
 			layout: 'auto',
 			defaults: {
-				padding: '0 0 10px 0',
+				padding: '0 0 10 0',
 				labelAlign: 'top',
 				width: '100%'
 			},
@@ -315,53 +315,179 @@ Ext.define('EDA.view.MainView', {
 							me.lookupReference('formSelector').setSource(aRegisterID);
 							me.lookupReference('questionXSelector').setSource();
 							me.lookupReference('questionYSelector').setSource();
+							me.lookupReference('questionZSelector').setSource();
 						}
-
 					}
 				},{
 					xtype: 'formselector',
 					reference: 'formSelector',
 					columnWidth: 1.0,
+					margin: '0 0 20 0',
 					listeners: {
 						change: function (aComponent, aFormID) {
 							me.lookupReference('questionXSelector').setSource(aFormID);
 							me.lookupReference('questionYSelector').setSource(aFormID);
+							me.lookupReference('questionZSelector').setSource(aFormID);
 						}
 					}
 				},{
-					xtype: 'questionselector',
-					store: qs,
-					reference: 'questionXSelector',
+					xtype: 'fieldset',
 					columnWidth: 0.333,
-					padding: '0 10 0 0',
-					fieldLabel: 'X-axel'
+					margin: '0 10 0 0',
+					title: 'Mått att visa',
+					layout: 'anchor',
+					defaults: {
+						labelAlign: 'top',
+						anchor: '100%'
+					},
+					items: [{
+						xtype: 'questionselector',
+						store: qs,
+						reference: 'questionZSelector'
+					},{
+						xtype: 'radio',
+						boxLabel: 'antal',
+						name: 'measure',
+						inputValue: 'count({v})'
+					},{
+						xtype: 'radio',
+						boxLabel: 'andel över brytpunkt',
+						name: 'measure',
+						inputValue: 'mean({v}({l}))'
+					},{
+						xtype: 'textfield',
+						margin: '0 0 0 25',
+						name: 'measureBreakpoint',
+						emptyText: 'ange ett värde här'
+					},{
+						xtype: 'radio',
+						boxLabel: 'andel med vissa värden',
+						name: 'measure',
+						inputValue: 'mean({v}({l}))'
+					},{
+						xtype: 'textfield',
+						margin: '0 0 0 25',
+						name: 'measureSplitlist',
+						emptyText: 'ange värden här'
+					},{
+						xtype: 'radio',
+						boxLabel: 'genomsnitt',
+						name: 'measure',
+						inputValue: 'mean({v})'
+					},{
+						xtype: 'radio',
+						margin: '0 0 10 0',
+						boxLabel: 'summa',
+						name: 'measure',
+						inputValue: 'sum({v})'
+					}]
 				},{
-					xtype: 'questionselector',
-					store: qs,
-					reference: 'questionYSelector',
+					xtype: 'fieldset',
 					columnWidth: 0.333,
-					padding: '0 10 0 0',
-					fieldLabel: 'Y-axel'
+					margin: '0 10 0 0',
+					title: 'Dela upp värden på',
+					layout: 'anchor',
+					defaults: {
+						labelAlign: 'top',
+						anchor: '100%'
+					},
+					items: [{
+						xtype: 'questionselector',
+						store: qs,
+						reference: 'questionXSelector',
+					},{
+						xtype: 'combo',
+						reference: 'clusterXSelector',
+						columnWidth: 1,
+						margin: '0 0 10 0',
+						fieldLabel: 'Gruppering',
+						editable: false,
+						store: [
+							[ 'year({v})',		'År'			],
+							[ 'quarter({v})',	'Kvartal'		],
+							[ 'month({v})',		'Månad'			],
+							[ 'week({v})',		'Vecka'			],
+							[ 'county({v})',	'Landsting'		],
+							[ 'region({v})',	'Region'		],
+							[ 'carelevel({v})',	'Vårdnivå'		]
+						]
+					/*
+					},{
+						xtype: 'radio',
+						boxLabel: 'landsting',
+						name: 'xUnitCluster',
+						inputValue: 'county({v})'
+					},{
+						xtype: 'radio',
+						boxLabel: 'region',
+						name: 'xUnitCluster',
+						inputValue: 'region({v})'
+					},{
+						xtype: 'radio',
+						boxLabel: 'vårdnivå',
+						name: 'xUnitCluster',
+						inputValue: 'carelevel({v})'
+					*/
+					}]
 				},{
-					xtype: 'combobox',
+					xtype: 'fieldset',
 					columnWidth: 0.333,
-					fieldLabel: 'Metod'
+					title: '... och sedan på',
+					layout: 'anchor',
+					defaults: {
+						labelAlign: 'top',
+						anchor: '100%'
+					},
+					items: [{
+						xtype: 'questionselector',
+						store: qs,
+						reference: 'questionYSelector',
+					},{
+						xtype: 'combo',
+						reference: 'clusterYSelector',
+						columnWidth: 1,
+						margin: '0 0 10 0',
+						fieldLabel: 'Gruppering',
+						editable: false,
+						store: [
+							[ 'year({v})',		'År'			],
+							[ 'quarter({v})',	'Kvartal'		],
+							[ 'month({v})',		'Månad'			],
+							[ 'week({v})',		'Vecka'			],
+							[ 'county({v})',	'Landsting'		],
+							[ 'region({v})',	'Region'		],
+							[ 'carelevel({v})',	'Vårdnivå'		]
+						]
+					}]
+				},{
+					xtype: 'combo',
+					reference: 'scopeSelector',
+					columnWidth: 1,
+					margin: '10 0 0 0',
+					fieldLabel: 'Visa resultat för',
+					editable: false,
+					value: 'unit',
+					store: [
+						[ 'unit',	'Vårdenheten'	],
+						[ 'county',	'Landstinget'	],
+						[ 'total',	'Riket'			]
+					],
 				}]
 			},{
 				xtype: 'panel',
 				itemId: 'resultPanel',
-				height: 400,
+				height: 300,
 				bodyPadding: 10,
 				header: false
 			},{
 				xtype: 'textfield',
 				itemId: 'resultURI',
-				fieldLabel: 'Länk till denna sida',
+				fieldLabel: 'Direktlänk till det du ser just nu',
 				readOnly: true
 			},{
 				xtype: 'textfield',
 				itemId: 'apiURI',
-				fieldLabel: 'Länk till JSON-underlag',
+				fieldLabel: 'Adress för API-anrop',
 				readOnly: true
 			},{
 				xtype: 'panel',
@@ -373,9 +499,7 @@ Ext.define('EDA.view.MainView', {
 				collapsible: true,
 				html:
 					'<ol>' +
-					'<li>Sortera listan med register i namnordning.</li>' +
-					'<li>Sortera listan med formulär i sequence-ordning (eller är den det redan?)</li>' +
-					'<li>Skall det finnas en z-variabel och sedan val av aggregeringsmetod under denna?</li>' +
+					'<li>Tooltips med förklaringar.</li>' +
 					'</ol>'
 			}]
 		}];
