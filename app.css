@@ -8,5 +8,5 @@ h1,h2,h3,ul,li,textarea,label,input,p,span,a,div,
 .x-form-type-radio { margin-bottom: 0; }
 .x-form-cb-label-default { line-height: 21px; }
 .icon-level { vertical-align: middle; padding-right: 5px; }
-.variable-item-wrapper { border-bottom: 1px dotted #ccc; padding: 5px 5px;}
-.variable-item-note { font-size: 13px; font-style: italic; line-height: 15px; }
+.variable-item-wrapper { border-bottom: 1px dotted #ccc; padding: 5px 5px; white-space: nowrap; }
+.variable-item-note { font-size: 13px; font-style: italic; line-height: 15px; white-space: normal; }

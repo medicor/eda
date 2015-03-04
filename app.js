@@ -148,6 +148,7 @@ Ext.define ('EDA.widget.FormSelector', {
 		Ext.apply (this, {
 			store: Ext.create('EDA.store.FormStore'),
 			fieldLabel: 'Formulär',
+			emptyText: 'Välj register först',
 			queryMode: 'local',
 			editable: false,
 			displayField: 'FormTitle',
@@ -178,6 +179,7 @@ Ext.define ('EDA.widget.QuestionSelector', {
 		Ext.apply (this, {
 			displayField: 'ColumnName',
 			valueField: 'QuestionID',
+			emptyText: 'Välj formulär först',
 			forceSelection: true,
 			selectOnFocus: true,
 			tpl: Ext.create('Ext.XTemplate',
@@ -210,8 +212,7 @@ Ext.define ('EDA.widget.QuestionSelector', {
 				}
 			),
 			listeners: {
-				select: function(t,r) {
-					console.log(r.data); //TODO: remove!
+				select: function() {
 				}
 			}
 		});
@@ -255,7 +256,7 @@ Ext.define ('EDA.widget.QuestionSelector', {
 			this.getStore().setSource(aFormID);
 			this.select();
 		} else {
-			this.emptyText = ' ';
+			this.emptyText = ' Välj formulär först';
 			this.getStore().setSource();
 			this.reset();
 		}
@@ -267,6 +268,7 @@ Ext.define('EDA.view.MainView', {
 	extend: 'Ext.container.Viewport',
 	itemId: 'mainView',
 	referenceHolder: true,
+	scrollable: 'vertical',
 	layout: {
 		type: 'center',
 	},
@@ -314,7 +316,6 @@ Ext.define('EDA.view.MainView', {
 						change: function (aComponent, aRegisterID) {
 							me.lookupReference('formSelector').setSource(aRegisterID);
 							me.lookupReference('questionXSelector').setSource();
-							me.lookupReference('questionYSelector').setSource();
 							me.lookupReference('questionZSelector').setSource();
 						}
 					}
@@ -326,15 +327,14 @@ Ext.define('EDA.view.MainView', {
 					listeners: {
 						change: function (aComponent, aFormID) {
 							me.lookupReference('questionXSelector').setSource(aFormID);
-							me.lookupReference('questionYSelector').setSource(aFormID);
 							me.lookupReference('questionZSelector').setSource(aFormID);
 						}
 					}
 				},{
 					xtype: 'fieldset',
-					columnWidth: 0.333,
+					columnWidth: 0.5,
 					margin: '0 10 0 0',
-					title: 'Mått att visa',
+					title: 'Variabel att visa',
 					layout: 'anchor',
 					defaults: {
 						labelAlign: 'top',
@@ -343,49 +343,53 @@ Ext.define('EDA.view.MainView', {
 					items: [{
 						xtype: 'questionselector',
 						store: qs,
-						reference: 'questionZSelector'
+						reference: 'questionZSelector',
+						listeners: {
+							select: function(aComponent, anItem) {
+								console.log(anItem);
+								me.lookupReference('aggregateSelector').setDisabled(false);
+							}
+						}
 					},{
-						xtype: 'radio',
-						boxLabel: 'antal',
-						name: 'measure',
-						inputValue: 'count({v})'
-					},{
-						xtype: 'radio',
-						boxLabel: 'andel över brytpunkt',
-						name: 'measure',
-						inputValue: 'mean({v}({l}))'
-					},{
-						xtype: 'textfield',
-						margin: '0 0 0 25',
-						name: 'measureBreakpoint',
-						emptyText: 'ange ett värde här'
-					},{
-						xtype: 'radio',
-						boxLabel: 'andel med vissa värden',
-						name: 'measure',
-						inputValue: 'mean({v}({l}))'
-					},{
-						xtype: 'textfield',
-						margin: '0 0 0 25',
-						name: 'measureSplitlist',
-						emptyText: 'ange värden här'
-					},{
-						xtype: 'radio',
-						boxLabel: 'genomsnitt',
-						name: 'measure',
-						inputValue: 'mean({v})'
-					},{
-						xtype: 'radio',
+						xtype: 'combo',
+						reference: 'aggregateSelector',
+						columnWidth: 1,
 						margin: '0 0 10 0',
-						boxLabel: 'summa',
-						name: 'measure',
-						inputValue: 'sum({v})'
+						fieldLabel: 'Mått',
+						editable: false,
+						disabled: true,
+						store: [
+							[ 'count({v})',		'Antal'						],
+							[ 'share({v}{e})',	'Andel under brytpunkt'		],
+							[ 'share({v}{e})',	'Andel med enskilda värden'	],
+							[ 'mean({v})',		'Medelvärde'				],
+							[ 'sum({v})',		'Summa av värden'			],
+							[ 'max({v})',		'Största värde'				],
+							[ 'min({v})',		'Minsta värde'				]
+						],
+						listeners: {
+							render: function() {
+								
+							}
+						}
+					},{
+						xtype: 'textfield',
+						name: 'measureBreakpoint',
+						hidden: true,
+						margin: '0 0 10 25',
+						emptyText: 'Ange ett värde'
+					},{
+						xtype: 'textfield',
+						name: 'measureSplitlist',
+						hidden: true,
+						margin: '0 0 10 0',
+						emptyText: 'Ange lista av värden'
 					}]
 				},{
 					xtype: 'fieldset',
-					columnWidth: 0.333,
-					margin: '0 10 0 0',
-					title: 'Dela upp värden på',
+					columnWidth: 0.5,
+					margin: '0 0 0 0',
+					title: 'Dela upp efter',
 					layout: 'anchor',
 					defaults: {
 						labelAlign: 'top',
@@ -400,8 +404,9 @@ Ext.define('EDA.view.MainView', {
 						reference: 'clusterXSelector',
 						columnWidth: 1,
 						margin: '0 0 10 0',
-						fieldLabel: 'Gruppering',
+						fieldLabel: 'Gruppera efter',
 						editable: false,
+						disabled: true,
 						store: [
 							[ 'year({v})',		'År'			],
 							[ 'quarter({v})',	'Kvartal'		],
@@ -411,54 +416,19 @@ Ext.define('EDA.view.MainView', {
 							[ 'region({v})',	'Region'		],
 							[ 'carelevel({v})',	'Vårdnivå'		]
 						]
-					/*
-					},{
-						xtype: 'radio',
-						boxLabel: 'landsting',
-						name: 'xUnitCluster',
-						inputValue: 'county({v})'
-					},{
-						xtype: 'radio',
-						boxLabel: 'region',
-						name: 'xUnitCluster',
-						inputValue: 'region({v})'
-					},{
-						xtype: 'radio',
-						boxLabel: 'vårdnivå',
-						name: 'xUnitCluster',
-						inputValue: 'carelevel({v})'
-					*/
 					}]
 				},{
-					xtype: 'fieldset',
-					columnWidth: 0.333,
-					title: '... och sedan på',
-					layout: 'anchor',
-					defaults: {
-						labelAlign: 'top',
-						anchor: '100%'
-					},
-					items: [{
-						xtype: 'questionselector',
-						store: qs,
-						reference: 'questionYSelector',
-					},{
-						xtype: 'combo',
-						reference: 'clusterYSelector',
-						columnWidth: 1,
-						margin: '0 0 10 0',
-						fieldLabel: 'Gruppering',
-						editable: false,
-						store: [
-							[ 'year({v})',		'År'			],
-							[ 'quarter({v})',	'Kvartal'		],
-							[ 'month({v})',		'Månad'			],
-							[ 'week({v})',		'Vecka'			],
-							[ 'county({v})',	'Landsting'		],
-							[ 'region({v})',	'Region'		],
-							[ 'carelevel({v})',	'Vårdnivå'		]
-						]
-					}]
+					xtype: 'checkboxgroup',
+					reference: 'scopeGroup',
+					columns: 1,
+					fieldLabel: 'Visa resultat för',
+					columnWidth: 1,
+					items: [
+						{ boxLabel: 'Din vårdenhet',	name: 'unitScope',		inputValue: 'unit', 	checked: true },
+						{ boxLabel: 'Ditt landsting',	name: 'countyScope',	inputValue: 'county'	},
+						{ boxLabel: 'Riket',			name: 'totalScope',		inputValue: 'total'		}
+					]
+				/*
 				},{
 					xtype: 'combo',
 					reference: 'scopeSelector',
@@ -472,6 +442,7 @@ Ext.define('EDA.view.MainView', {
 						[ 'county',	'Landstinget'	],
 						[ 'total',	'Riket'			]
 					],
+				*/
 				}]
 			},{
 				xtype: 'panel',
@@ -482,12 +453,12 @@ Ext.define('EDA.view.MainView', {
 			},{
 				xtype: 'textfield',
 				itemId: 'resultURI',
-				fieldLabel: 'Direktlänk till det du ser just nu',
+				fieldLabel: 'Länk till det du ser just nu',
 				readOnly: true
 			},{
 				xtype: 'textfield',
 				itemId: 'apiURI',
-				fieldLabel: 'Adress för API-anrop',
+				fieldLabel: 'Länk till API-anrop (för programmerare)',
 				readOnly: true
 			},{
 				xtype: 'panel',
