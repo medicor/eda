@@ -1,0 +1,2 @@
+# strats
+Stratum statistics
