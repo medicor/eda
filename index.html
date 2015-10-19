@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+	<title>Stratumstatistik</title>
+	<link rel="shortcut icon" href="favicon.png">
+	<link href="https://fonts.googleapis.com/css?family=RobotoDraft:400,500,700,400italic" rel="stylesheet" type="text/css">
+	<script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+
+	<link rel="import" href="bower_components/app-router/app-router.html">
+	<link rel="import" href="bower_components/paper-drawer-panel/paper-drawer-panel.html">
+	<link rel="import" href="bower_components/paper-header-panel/paper-header-panel.html">
+	<link rel="import" href="bower_components/paper-toolbar/paper-toolbar.html">
+	<link rel="import" href="bower_components/paper-menu/paper-menu.html">
+	<link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+	<link rel="import" href="bower_components/iron-icons/iron-icons.html">
+	<link rel="import" href="bower_components/iron-icons/social-icons.html">
+	<link rel="import" href="bower_components/iron-icons/maps-icons.html">
+	<link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout.html">
+
+	<style is="custom-style">
+	
+		:root {
+			--default-primary-color: #FF5722; /* Deep orange (https://www.google.com/design/spec/style/color.html#color-color-palette) */
+		}
+
+		body {
+			font: 18px 'RobotoDraft', Helvetica, Arial, sans-serif;
+		}
+		
+		#drawer {
+			background: #4b4b4b;
+		}
+		
+		#main {
+			padding: 20px;
+			overflow: scroll;
+		}
+		
+		paper-menu {
+			background: transparent;
+		}
+		
+		paper-item iron-icon {
+			margin-right: 10px;
+		}
+		
+		paper-item a {
+			height: 30px;
+			line-height: 25px;
+			padding: 10px;
+			color: #fff;
+			text-decoration: none;
+			@apply(--layout-horizontal) 
+		}
+		
+		paper-item.iron-selected a {
+			font-weight: normal;
+			background: rgba(255, 255, 255, 0.12);
+		}
+		
+	</style>
+</head>
+
+<body unresolved class="fullbleed layout vertical">
+	<template is="dom-bind" id="app">
+		<paper-drawer-panel>
+			<div drawer id="drawer">
+				<paper-toolbar>
+					<span>Stratumstatistik</span>
+				</paper-toolbar>
+				<paper-menu selected="0">
+					<paper-item>
+						<a href="#/overview"><iron-icon icon="maps:place"></iron-icon>Översikt</a>
+					</paper-item>
+					<paper-item>
+						<a href="#/about"><iron-icon icon="home"></iron-icon>Om</a>
+					</paper-item>
+				</paper-menu>
+			</div>
+			<div main id="main">
+				<paper-icon-button id="menu-toggle" icon="menu" paper-drawer-toggle></paper-icon-button>
+				<div>
+					<app-router mode="hash">
+						<app-route path="/overview" import="elements/overview-page.html"></app-route>
+						<app-route path="/about" import="elements/about-page.html"></app-route>
+						<app-route path="*" redirect="/overview"></app-route>
+					</app-router>
+				</div>
+			</div>
+		</paper-drawer-panel>
+	</template>
+
+	<script type="text/javascript">
+		/*
+				var app = document.querySelector('#app');
+				app.onMenuSelect = function() {
+					// Close the drawer after selection on mobile.
+					var drawerPanel = document.querySelector('paper-drawer-panel');
+					if (drawerPanel.narrow) {
+						drawerPanel.closeDrawer();
+					}
+				};
+			*/
+	</script>
+</body>
+
+</html>
