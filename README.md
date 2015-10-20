@@ -1,3 +1,3 @@
 # EDA
 
-a Stratum application for explorative data analysis.
+a Polymer application for explorative data analysis in Stratum quality register platform.
