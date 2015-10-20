@@ -1,2 +1,3 @@
-# Strats
-Stratum statistics
+# EDA
+
+a Stratum application for explorative data analysis.
