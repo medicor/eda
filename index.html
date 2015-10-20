@@ -17,16 +17,15 @@
 	<link rel="import" href="bower_components/paper-menu/paper-menu.html">
 	<link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
 	<link rel="import" href="bower_components/iron-icons/iron-icons.html">
-	<link rel="import" href="bower_components/iron-icons/social-icons.html">
-	<link rel="import" href="bower_components/iron-icons/maps-icons.html">
+	<link rel="import" href="bower_components/iron-icons/editor-icons.html">
 	<link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout.html">
 
-	<style is="custom-style"> 
-	
+	<style is="custom-style">
 		:root {
-			--default-primary-color: #FF5722; /* Deep orange (https://www.google.com/design/spec/style/color.html#color-color-palette) */
+			--default-primary-color: #FF5722;
+			/* Deep orange (https://www.google.com/design/spec/style/color.html#color-color-palette) */
 		}
-
+		
 		body {
 			font: 18px 'RobotoDraft', Helvetica, Arial, sans-serif;
 		}
@@ -49,17 +48,23 @@
 		}
 		
 		paper-item a {
-			height: 30px;
-			line-height: 25px;
-			padding: 10px;
+			padding: 10px 20px 5px 10px;
 			color: #fff;
 			text-decoration: none;
-			@apply(--layout-horizontal) 
+			@apply(--layout-horizontal)
 		}
 		
-		paper-item.iron-selected a {
+		paper-item.iron-selected > a,
+		paper-item.iron-selected > aside {
 			font-weight: normal;
 			background: rgba(255, 255, 255, 0.12);
+		}
+		
+		aside {
+			padding: 0px 20px 20px 45px;
+			color: #ccc;
+			font-size: 14px;
+			font-weight: normal;
 		}
 		
 	</style>
@@ -74,10 +79,24 @@
 				</paper-toolbar>
 				<paper-menu>
 					<paper-item>
-						<a href="#/overview"><iron-icon icon="maps:place"></iron-icon>Översikt</a>
+						<a href="#/overview">
+							<iron-icon icon="home"></iron-icon>
+							Översikt
+						</a>
+						<aside>administrativ statistik med antal register, vårdenheter, användare.</aside>
 					</paper-item>
 					<paper-item>
-						<a href="#/about"><iron-icon icon="home"></iron-icon>Om</a>
+						<a href="#/aggregat">
+							<iron-icon icon="trending-up"></iron-icon>
+							Aggregat
+						</a>
+						<aside>deskriptiv statistik med antal, summor eller medelvärden, uppdelat på en eller flera variabler.</aside>
+					</paper-item>
+					<paper-item>
+						<a href="#/about">
+							<iron-icon icon="description"></iron-icon>
+							Om
+						</a>
 					</paper-item>
 				</paper-menu>
 			</div>
@@ -96,15 +115,15 @@
 
 	<script type="text/javascript">
 		/*
-				var app = document.querySelector('#app');
-				app.onMenuSelect = function() {
-					// Close the drawer after selection on mobile.
-					var drawerPanel = document.querySelector('paper-drawer-panel');
-					if (drawerPanel.narrow) {
-						drawerPanel.closeDrawer();
-					}
-				};
-			*/
+												var app = document.querySelector('#app');
+												app.onMenuSelect = function() {
+													// Close the drawer after selection on mobile.
+													var drawerPanel = document.querySelector('paper-drawer-panel');
+													if (drawerPanel.narrow) {
+														drawerPanel.closeDrawer();
+													}
+												};
+											*/
 	</script>
 </body>
 

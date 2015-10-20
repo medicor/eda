@@ -31,6 +31,7 @@
     "paper-radio-button": "polymerelements/paper-radio-button#^1.0.0",
     "paper-radio-group": "polymerelements/paper-radio-group#^1.0.0",
     "paper-toolbar": "polymerelements/paper-toolbar#^1.0.0",
+    "paper-material": "polymerelements/paper-material#^1.0.0",
     "progress-bubble": "master",
     "app-router": "blasten/app-router#master",
     "paper-typeahead-input": "master"
