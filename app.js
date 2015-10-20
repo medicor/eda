@@ -130,7 +130,7 @@ Ext.define ('EDA.widget.RegisterSelector', {
 			store: Ext.create('EDA.store.RegisterStore'),
 			editable: false,
 			queryMode: 'local',
-			emptyText: 'Välj register',
+			emptyText: '(välj register)',
 			fieldLabel: 'Register',
 			displayField: 'RegisterName',
 			valueField: 'RegisterID'
@@ -148,7 +148,7 @@ Ext.define ('EDA.widget.FormSelector', {
 		Ext.apply (this, {
 			store: Ext.create('EDA.store.FormStore'),
 			fieldLabel: 'Formulär',
-			emptyText: 'Välj register först',
+			emptyText: '(välj register först)',
 			queryMode: 'local',
 			editable: false,
 			displayField: 'FormTitle',
@@ -160,7 +160,7 @@ Ext.define ('EDA.widget.FormSelector', {
 	setSource: function(aRegisterID) {
 		if (aRegisterID) {
 			this.getStore().setSource(aRegisterID);
-			this.emptyText = 'Välj formulär';
+			this.emptyText = '(välj formulär)';
 			this.select();
 		} else {
 			this.getStore().setSource();
@@ -179,7 +179,7 @@ Ext.define ('EDA.widget.QuestionSelector', {
 		Ext.apply (this, {
 			displayField: 'ColumnName',
 			valueField: 'QuestionID',
-			emptyText: 'Välj formulär först',
+			emptyText: '(välj formulär först)',
 			forceSelection: true,
 			selectOnFocus: true,
 			tpl: Ext.create('Ext.XTemplate',
@@ -256,7 +256,7 @@ Ext.define ('EDA.widget.QuestionSelector', {
 			this.getStore().setSource(aFormID);
 			this.select();
 		} else {
-			this.emptyText = ' Välj formulär först';
+			this.emptyText = '(välj formulär först)';
 			this.getStore().setSource();
 			this.reset();
 		}
@@ -334,42 +334,58 @@ Ext.define('EDA.view.MainView', {
 					xtype: 'fieldset',
 					columnWidth: 0.5,
 					margin: '0 10 0 0',
-					title: 'Variabel att visa',
+					title: 'Räkna på?',
 					layout: 'anchor',
 					defaults: {
 						labelAlign: 'top',
 						anchor: '100%'
 					},
-					items: [{
-						xtype: 'questionselector',
-						store: qs,
-						reference: 'questionZSelector',
-						listeners: {
-							select: function(aComponent, anItem) {
-								console.log(anItem);
-								me.lookupReference('aggregateSelector').setDisabled(false);
-							}
-						}
+					items: [
+					/*
+					{
+						xtype: 'checkbox',
+						reference: 'countOfRegistrationsCheckbox',
+						boxLabel: 'antal registreringar',
+						value: true
 					},{
+						xtype: 'checkbox',
+						reference: 'countOfSubjectsCheckbox',
+						boxLabel: 'antal patienter',
+						value: true
+					*/
+					{
 						xtype: 'combo',
 						reference: 'aggregateSelector',
-						columnWidth: 1,
 						margin: '0 0 10 0',
-						fieldLabel: 'Mått',
+						/*fieldLabel: 'Mått att visa',*/
 						editable: false,
-						disabled: true,
+						/*disabled: true,*/
+						/*emptyText: '(välj variabel ovan först)',*/
 						store: [
-							[ 'count({v})',		'Antal'						],
-							[ 'share({v}{e})',	'Andel under brytpunkt'		],
-							[ 'share({v}{e})',	'Andel med enskilda värden'	],
-							[ 'mean({v})',		'Medelvärde'				],
-							[ 'sum({v})',		'Summa av värden'			],
-							[ 'max({v})',		'Största värde'				],
-							[ 'min({v})',		'Minsta värde'				]
+							[ 'count({v})',			'Antal registreringar'		],
+							[ 'subjectcount({v})',	'Antal patienter'			],
+							[ 'share({v}{e})',		'Andel under brytpunkt'		],
+							[ 'share({v}{e})',		'Andel med enskilda värden'	],
+							[ 'mean({v})',			'Medelvärde'				],
+							[ 'sum({v})',			'Summa av värden'			],
+							[ 'max({v})',			'Största värde'				],
+							[ 'min({v})',			'Minsta värde'				]
 						],
+						value: 'count({v})',
 						listeners: {
 							render: function() {
 								
+							}
+						}
+					},{
+						xtype: 'questionselector',
+						reference: 'questionZSelector',
+						fieldLabel: 'För',
+						disabled: true,
+						store: qs,
+						listeners: {
+							select: function(aComponent, anItem) {
+								me.lookupReference('aggregateSelector').setDisabled(false);
 							}
 						}
 					},{
@@ -377,7 +393,7 @@ Ext.define('EDA.view.MainView', {
 						name: 'measureBreakpoint',
 						hidden: true,
 						margin: '0 0 10 25',
-						emptyText: 'Ange ett värde'
+						emptyText: 'Ange *ett* värde'
 					},{
 						xtype: 'textfield',
 						name: 'measureSplitlist',
@@ -389,7 +405,7 @@ Ext.define('EDA.view.MainView', {
 					xtype: 'fieldset',
 					columnWidth: 0.5,
 					margin: '0 0 0 0',
-					title: 'Dela upp efter',
+					title: 'Dela upp värden?',
 					layout: 'anchor',
 					defaults: {
 						labelAlign: 'top',
@@ -402,11 +418,11 @@ Ext.define('EDA.view.MainView', {
 					},{
 						xtype: 'combo',
 						reference: 'clusterXSelector',
-						columnWidth: 1,
 						margin: '0 0 10 0',
 						fieldLabel: 'Gruppera efter',
 						editable: false,
 						disabled: true,
+						emptyText: '(välj variabel ovan först)',
 						store: [
 							[ 'year({v})',		'År'			],
 							[ 'quarter({v})',	'Kvartal'		],
@@ -417,6 +433,7 @@ Ext.define('EDA.view.MainView', {
 							[ 'carelevel({v})',	'Vårdnivå'		]
 						]
 					}]
+				/*
 				},{
 					xtype: 'checkboxgroup',
 					reference: 'scopeGroup',
@@ -428,41 +445,90 @@ Ext.define('EDA.view.MainView', {
 						{ boxLabel: 'Ditt landsting',	name: 'countyScope',	inputValue: 'county'	},
 						{ boxLabel: 'Riket',			name: 'totalScope',		inputValue: 'total'		}
 					]
-				/*
+				*/
+				},{
+					xtype: 'label',
+					text: 'Visa resultat för:',
+					columnWidth: 1.0,
+					margin: '20 0 0 0'
+				},{
+					/*
+					xtype: 'combo',
+					reference: 'unitSelector',
+					columnWidth: 0.5,
+					margin: '5 0 0 0',
+					editable: false,
+					emptyText: '(välj vårdenhet)',
+					store: [
+						[ '1234',	'SU/Sahlgrenska'			]
+					],
 				},{
 					xtype: 'combo',
-					reference: 'scopeSelector',
-					columnWidth: 1,
-					margin: '10 0 0 0',
-					fieldLabel: 'Visa resultat för',
+					reference: 'countySelector',
+					columnWidth: 0.5,
+					margin: '5 0 0 10',
 					editable: false,
-					value: 'unit',
+					emptyText: '(välj landsting)',
 					store: [
-						[ 'unit',	'Vårdenheten'	],
-						[ 'county',	'Landstinget'	],
-						[ 'total',	'Riket'			]
+						[ '4113',	'Västra Götaland'			]
 					],
-				*/
+					*/
+				},{
+					xtype: 'checkbox',
+					reference: 'unitSelector',
+					boxLabel: 'Vårdenheten',
+					value: true,
+					columnWidth: 0.2,
+					margin: '5 0 0 0'
+				},{
+					xtype: 'checkbox',
+					reference: 'countySelector',
+					boxLabel: 'Landstinget',
+					columnWidth: 0.2,
+					margin: '5 0 0 0'
+				},{
+					xtype: 'checkbox',
+					reference: 'totalSelector',
+					boxLabel: 'Riket',
+					columnWidth: 0.6,
+					margin: '5 0 0 0'
 				}]
 			},{
 				xtype: 'panel',
-				itemId: 'resultPanel',
+				reference: 'resultPanel',
 				height: 300,
 				bodyPadding: 10,
 				header: false
 			},{
-				xtype: 'textfield',
-				itemId: 'resultURI',
-				fieldLabel: 'Länk till det du ser just nu',
-				readOnly: true
+				xtype: 'container',
+				layout: 'column',
+				items: [{
+					xtype: 'label',
+					text: 'Länk till det du ser just nu:',
+					columnWidth: 1.0,
+					margin: '0 0 5 0'
+				},{
+					xtype: 'textfield',
+					reference: 'resultURIField',
+					readOnly: true,
+					columnWidth: 1.0,
+					margin: '0 10 0 0'
+				},{
+					xtype: 'button',
+					reference: 'copyResultURIButton',
+					text: 'Kopiera',
+					width: 90
+				}]
 			},{
+			/*
 				xtype: 'textfield',
-				itemId: 'apiURI',
+				reference: 'apiURI',
 				fieldLabel: 'Länk till API-anrop (för programmerare)',
 				readOnly: true
 			},{
+			*/
 				xtype: 'panel',
-				itemId: 'todoPanel',
+				reference: 'todoPanel',
 				bodyPadding: 10,
 				title: 'Att göra',
 				frame: true,
@@ -470,7 +536,13 @@ Ext.define('EDA.view.MainView', {
 				collapsible: true,
 				html:
 					'<ol>' +
+					'<li>Implementera ViewModel utifrån http://docs.sencha.com/extjs/5.0/application_architecture/view_models_data_binding.html</li>' + 
+					'<li>Lägg till val av vårdenhet och landsting om det inte kan plockas från aktuell kontext.</li>' +
+					'<li>Lägg till "antal patienter" som alternativ till "antal registreringar".</li>' +
 					'<li>Tooltips med förklaringar.</li>' +
+					'<li>Växla mellan stapeldiagram och tabell?</li>' +
+					'<li>Knapp med "Kopiera api-anrop" till höger ovanför diagrammet?</li>' +
+					'<li>http://stratum.registercentrum.se/api/aggregate/LVR/Visit/total/share(Height(165))/VisitUnit/Gender?apikey=bK3H9bwaG4o=</li>' +
 					'</ol>'
 			}]
 		}];
