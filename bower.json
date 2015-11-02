@@ -33,7 +33,8 @@
     "paper-toolbar": "polymerelements/paper-toolbar#^1.0.0",
     "paper-material": "polymerelements/paper-material#^1.0.0",
     "progress-bubble": "master",
-    "app-router": "blasten/app-router#master",
+    "app-router": "master",
+    "pushstate-anchor": "master",
     "paper-typeahead-input": "master"
   }
 }

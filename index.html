@@ -3,10 +3,24 @@
 
 <head>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
 
 	<title>Stratumstatistik</title>
-	<link rel="shortcut icon" href="favicon.png">
+	<link rel="apple-touch-icon" sizes="57x57" href="images/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="images/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="images/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="images/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="images/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="images/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="images/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="images/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="images/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192" href="images/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="images/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+
 	<link href="https://fonts.googleapis.com/css?family=RobotoDraft:400,500,700,400italic" rel="stylesheet" type="text/css">
 	<script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
 
@@ -19,6 +33,8 @@
 	<link rel="import" href="bower_components/iron-icons/iron-icons.html">
 	<link rel="import" href="bower_components/iron-icons/editor-icons.html">
 	<link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout.html">
+
+	<link rel="import" href="elements/navigation-item.html">
 
 	<style is="custom-style">
 		:root {
@@ -42,31 +58,6 @@
 		paper-menu {
 			background: transparent;
 		}
-		
-		paper-item iron-icon {
-			margin-right: 10px;
-		}
-		
-		paper-item a {
-			padding: 10px 20px 5px 10px;
-			color: #fff;
-			text-decoration: none;
-			@apply(--layout-horizontal)
-		}
-		
-		paper-item.iron-selected > a,
-		paper-item.iron-selected > aside {
-			font-weight: normal;
-			background: rgba(255, 255, 255, 0.12);
-		}
-		
-		aside {
-			padding: 0px 20px 20px 45px;
-			color: #ccc;
-			font-size: 14px;
-			font-weight: normal;
-		}
-		
 	</style>
 </head>
 
@@ -77,36 +68,26 @@
 				<paper-toolbar>
 					<span>Stratumstatistik</span>
 				</paper-toolbar>
-				<paper-menu>
-					<paper-item>
-						<a href="#/overview">
-							<iron-icon icon="home"></iron-icon>
-							Översikt
-						</a>
-						<aside>administrativ statistik med antal register, vårdenheter, användare.</aside>
-					</paper-item>
-					<paper-item>
-						<a href="#/aggregat">
-							<iron-icon icon="trending-up"></iron-icon>
-							Aggregat
-						</a>
-						<aside>deskriptiv statistik med antal, summor eller medelvärden, uppdelat på en eller flera variabler.</aside>
-					</paper-item>
-					<paper-item>
-						<a href="#/about">
-							<iron-icon icon="description"></iron-icon>
-							Om
-						</a>
-					</paper-item>
+				<paper-menu on-iron-select="onMenuSelect">
+					<navigation-item href="overview" icon="home" note="ger en bild över våra register och hur de används över tid.">
+						Översikt
+					</navigation-item>
+					<navigation-item href="aggregat" icon="trending-up" note="deskriptiv statistik för en eller flera av våra registers variabler.">
+						Aggregat
+					</navigation-item>
+					<navigation-item href="about" icon="description">
+						Om
+					</navigation-item>
 				</paper-menu>
 			</div>
 			<div main id="main">
 				<paper-icon-button id="menu-toggle" icon="menu" paper-drawer-toggle></paper-icon-button>
 				<div>
-					<app-router mode="hash">
-						<app-route path="/overview" import="elements/overview-page.html"></app-route>
-						<app-route path="/about" import="elements/about-page.html"></app-route>
-						<app-route path="*" redirect="/overview"></app-route>
+					<app-router mode="pushstate">
+						<app-route path="overview" import="elements/overview-page.html"></app-route>
+						<app-route path="aggregat" import="elements/overview-page.html"></app-route>
+						<app-route path="about" import="elements/about-page.html"></app-route>
+						<app-route path="*" redirect="overview"></app-route>
 					</app-router>
 				</div>
 			</div>
@@ -114,16 +95,29 @@
 	</template>
 
 	<script type="text/javascript">
-		/*
-												var app = document.querySelector('#app');
-												app.onMenuSelect = function() {
-													// Close the drawer after selection on mobile.
-													var drawerPanel = document.querySelector('paper-drawer-panel');
-													if (drawerPanel.narrow) {
-														drawerPanel.closeDrawer();
-													}
-												};
-											*/
+		var app = document.querySelector('#app');
+		app.onMenuSelect = function() {
+			// Close the drawer after selection on mobile.
+			var d = document.querySelector('paper-drawer-panel');
+			if (d.narrow) {
+				d.closeDrawer();
+			}
+		};
+		// Set initial paper-menu item selected.
+		//TODO: must be a better way to do this?!?
+		window.addEventListener('WebComponentsReady', function() {
+			var m = document.querySelector('paper-menu'), 
+				r = document.querySelector('app-router'),
+				i = 0;
+
+			[].some.call(r.children, function(e) { 
+				if (location.href.match('/' + e.attributes['path'].value + '$')) {
+					m.selected = i;
+					return true;
+				}
+				i++;
+			});
+		});
 	</script>
 </body>
 
